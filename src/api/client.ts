@@ -13,7 +13,10 @@ import type {
   VocabStatsResponse,
 } from '../types';
 
-const BASE = '/api';
+const BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
