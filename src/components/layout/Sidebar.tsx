@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/morphemes', label: 'Morphemes' },
   { to: '/undertrained', label: 'Under-trained' },
   { to: '/compare', label: 'Comparison' },
+  { to: '/merge-tree', label: 'Merge Tree' },
 ];
 
 export function Sidebar() {

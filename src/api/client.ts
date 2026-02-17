@@ -2,6 +2,7 @@ import type {
   ComparisonTokenizeResponse,
   EfficiencyResponse,
   LanguageCompositionResponse,
+  MergeTreeComparisonResponse,
   MorphemeAnalysisResponse,
   MultiplicityResponse,
   OverlapResult,
@@ -171,5 +172,16 @@ export async function compareEfficiency(
   return fetchJSON<EfficiencyResponse>(`${BASE}/comparison/efficiency`, {
     method: 'POST',
     body: JSON.stringify({ tokenizer_ids: tokenizerIds, sample_texts: sampleTexts }),
+  });
+}
+
+// Merge Tree
+export async function compareMergeTrees(
+  tokenizerIds: [string, string],
+  text: string
+): Promise<MergeTreeComparisonResponse> {
+  return fetchJSON<MergeTreeComparisonResponse>(`${BASE}/merge-tree/compare`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
   });
 }

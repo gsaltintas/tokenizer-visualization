@@ -143,3 +143,43 @@ export interface EfficiencyMetric {
 export interface EfficiencyResponse {
   metrics: EfficiencyMetric[];
 }
+
+// Merge Tree
+
+export interface MergeTreeNode {
+  token: string;
+  rank: number;
+  is_leaf: boolean;
+  left?: MergeTreeNode;
+  right?: MergeTreeNode;
+}
+
+export interface MergeStepInfo {
+  step: number;
+  merged_token: string;
+  rank: number;
+  tokens_after: string[];
+}
+
+export interface MergeTreeTokenizerResult {
+  name: string;
+  trees: MergeTreeNode[];
+  steps: MergeStepInfo[];
+  final_tokens: string[];
+}
+
+export interface ConflictAnalysis {
+  shared_intermediates: string[];
+  only_a: string[];
+  only_b: string[];
+  is_compatible: boolean;
+  conflict_count: number;
+}
+
+export interface MergeTreeComparisonResponse {
+  text: string;
+  initial_bytes: string[];
+  tokenizer_a: MergeTreeTokenizerResult;
+  tokenizer_b: MergeTreeTokenizerResult;
+  conflict_analysis: ConflictAnalysis;
+}
