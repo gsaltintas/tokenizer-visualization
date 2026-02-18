@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
@@ -13,6 +13,41 @@ export function TokenizeView() {
     const timer = setTimeout(() => setDebouncedText(text), 200);
     return () => clearTimeout(timer);
   }, [text]);
+
+  const chipsRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const exportToPdf = useCallback(async () => {
+    const el = chipsRef.current;
+    if (!el) return;
+    setExporting(true);
+    try {
+      const html2canvas = (await import('html2canvas-pro')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(el, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      // Convert px to mm at 72 DPI (canvas pixels are scaled by 3)
+      const pxToMm = 25.4 / 72 / 3;
+      const pdfW = imgWidth * pxToMm + 10;  // 5mm padding each side
+      const pdfH = imgHeight * pxToMm + 10;
+
+      const pdf = new jsPDF({
+        orientation: pdfW > pdfH ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [pdfW, pdfH],
+      });
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 5, 5, pdfW - 10, pdfH - 10);
+      pdf.save('tokens.pdf');
+    } finally {
+      setExporting(false);
+    }
+  }, []);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['tokenize', activeTokenizerId, debouncedText],
@@ -49,8 +84,17 @@ export function TokenizeView() {
           </div>
 
           <div className="p-4 bg-white rounded-lg border">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Tokens</h3>
-            <div className="flex flex-wrap gap-0.5 leading-relaxed">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700">Tokens</h3>
+              <button
+                onClick={exportToPdf}
+                disabled={exporting}
+                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-200 transition-colors disabled:opacity-50"
+              >
+                {exporting ? 'Exporting...' : 'Export PDF'}
+              </button>
+            </div>
+            <div ref={chipsRef} className="flex flex-wrap gap-0.5 leading-relaxed">
               {data.tokens.map((token, i) => (
                 <TokenChip key={i} token={token} index={i} />
               ))}
