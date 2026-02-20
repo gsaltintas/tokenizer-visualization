@@ -2,6 +2,8 @@ import type {
   ComparisonTokenizeResponse,
   EfficiencyResponse,
   LanguageCompositionResponse,
+  MergeForestResponse,
+  MergeForestSubtreeResponse,
   MergeTreeComparisonResponse,
   MorphemeAnalysisResponse,
   MultiplicityResponse,
@@ -176,6 +178,39 @@ export async function compareEfficiency(
     method: 'POST',
     body: JSON.stringify({ tokenizer_ids: tokenizerIds, sample_texts: sampleTexts }),
   });
+}
+
+// Merge Forest
+export async function getMergeForest(
+  tokId: string,
+  page = 1,
+  pageSize = 100,
+  search = '',
+  sortBy = 'rank',
+  sortDir: 'asc' | 'desc' = 'asc',
+  filter = 'all',
+): Promise<MergeForestResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+    sort_by: sortBy,
+    sort_dir: sortDir,
+    filter,
+  });
+  if (search) params.set('search', search);
+  return fetchJSON<MergeForestResponse>(
+    `${BASE}/merge-forest/${tokId}?${params}`
+  );
+}
+
+export async function getMergeForestSubtree(
+  tokId: string,
+  rank: number,
+): Promise<MergeForestSubtreeResponse> {
+  const params = new URLSearchParams({ tok_id: tokId });
+  return fetchJSON<MergeForestSubtreeResponse>(
+    `${BASE}/merge-forest/subtree/${rank}?${params}`
+  );
 }
 
 // Merge Tree

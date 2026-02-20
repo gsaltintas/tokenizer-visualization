@@ -11,6 +11,7 @@ import { MorphemeView } from './components/morphemes/MorphemeView';
 import { UndertrainedView } from './components/undertrained/UndertrainedView';
 import { ComparisonView } from './components/comparison/ComparisonView';
 import { MergeTreeView } from './components/merge-tree/MergeTreeView';
+import { MergeForestView } from './components/merge-forest/MergeForestView';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +48,7 @@ function App() {
               <Route path="/undertrained" element={<UndertrainedView />} />
               <Route path="/compare" element={<ComparisonView />} />
               <Route path="/merge-tree" element={<MergeTreeView />} />
+              <Route path="/merge-forest" element={<MergeForestView />} />
             </Route>
           </Routes>
         </BrowserRouter>

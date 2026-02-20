@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { to: '/undertrained', label: 'Under-trained' },
   { to: '/compare', label: 'Comparison' },
   { to: '/merge-tree', label: 'Merge Tree' },
+  { to: '/merge-forest', label: 'Merge Forest' },
 ];
 
 export function Sidebar() {

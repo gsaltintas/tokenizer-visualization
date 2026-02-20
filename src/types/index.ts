@@ -183,3 +183,45 @@ export interface MergeTreeComparisonResponse {
   tokenizer_b: MergeTreeTokenizerResult;
   conflict_analysis: ConflictAnalysis;
 }
+
+// Merge Forest
+
+export interface MergeForestEntry {
+  token: string;
+  token_hex: string;
+  rank: number;
+  byte_length: number;
+  is_leaf: boolean;
+  is_root: boolean;
+  left: string | null;
+  left_hex: string | null;
+  left_rank: number | null;
+  right: string | null;
+  right_hex: string | null;
+  right_rank: number | null;
+}
+
+export interface MergeForestResponse {
+  entries: MergeForestEntry[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_leaves: number;
+  total_merges: number;
+  total_roots: number;
+}
+
+export interface MergeForestSubtreeNode {
+  token: string;
+  token_hex: string;
+  rank: number;
+  is_leaf: boolean;
+  left?: MergeForestSubtreeNode;
+  right?: MergeForestSubtreeNode;
+}
+
+export interface MergeForestSubtreeResponse {
+  root: MergeForestSubtreeNode;
+  depth: number;
+  node_count: number;
+}
