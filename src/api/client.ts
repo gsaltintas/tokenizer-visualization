@@ -4,6 +4,7 @@ import type {
   LanguageCompositionResponse,
   MergeForestResponse,
   MergeForestSubtreeResponse,
+  MergeForestTreesResponse,
   MergeTreeComparisonResponse,
   MorphemeAnalysisResponse,
   MultiplicityResponse,
@@ -200,6 +201,26 @@ export async function getMergeForest(
   if (search) params.set('search', search);
   return fetchJSON<MergeForestResponse>(
     `${BASE}/merge-forest/${tokId}?${params}`
+  );
+}
+
+export async function getMergeForestTrees(
+  tokId: string,
+  page = 1,
+  pageSize = 20,
+  search = '',
+  sortBy = 'byte_length',
+  sortDir: 'asc' | 'desc' = 'desc',
+): Promise<MergeForestTreesResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+    sort_by: sortBy,
+    sort_dir: sortDir,
+  });
+  if (search) params.set('search', search);
+  return fetchJSON<MergeForestTreesResponse>(
+    `${BASE}/merge-forest/trees/${tokId}?${params}`
   );
 }
 

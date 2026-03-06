@@ -225,3 +225,20 @@ export interface MergeForestSubtreeResponse {
   depth: number;
   node_count: number;
 }
+
+export interface MergeForestTreeInfo {
+  root: MergeForestSubtreeNode;
+  depth: number;
+  node_count: number;
+  byte_length: number;
+}
+
+export interface MergeForestTreesResponse {
+  trees: MergeForestTreeInfo[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_leaves: number;
+  total_merges: number;
+  total_roots: number;
+}
