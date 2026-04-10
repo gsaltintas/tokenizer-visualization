@@ -39,6 +39,13 @@ export async function listTokenizers(): Promise<TokenizerInfo[]> {
   return data.tokenizers;
 }
 
+export async function reloadTokenizer(name: string): Promise<TokenizerInfo> {
+  const data = await fetchJSON<{ tokenizer: TokenizerInfo }>(`${BASE}/tokenizers/${encodeURIComponent(name)}/reload`, {
+    method: 'POST',
+  });
+  return data.tokenizer;
+}
+
 export async function loadTokenizer(name: string): Promise<TokenizerInfo> {
   const data = await fetchJSON<{ tokenizer: TokenizerInfo }>(`${BASE}/tokenizers/load`, {
     method: 'POST',
