@@ -41,30 +41,32 @@ export function TokenizerSelector() {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Active Tokenizer</label>
-        {loadedTokenizers.length > 0 ? (
-          <div className="flex gap-2">
-            <select
-              className="flex-1 px-3 py-2 border rounded-lg text-sm bg-white"
-              value={activeTokenizerId || ''}
-              onChange={(e) => setActiveTokenizer(e.target.value)}
-            >
-              <option value="">Select...</option>
-              {loadedTokenizers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.source}, {t.vocab_size.toLocaleString()} tokens)
-                </option>
-              ))}
-            </select>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium text-gray-700">Active Tokenizer</label>
+          {activeTokenizerId && (
             <button
-              className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => reloadMutation.mutate(activeTokenizerId)}
+              disabled={reloadMutation.isPending}
               title="Reload tokenizer"
-              onClick={() => activeTokenizerId && reloadMutation.mutate(activeTokenizerId)}
-              disabled={!activeTokenizerId || reloadMutation.isPending}
+              className="text-xs text-gray-400 hover:text-gray-600 disabled:opacity-40"
             >
-              {reloadMutation.isPending ? '...' : '↻'}
+              {reloadMutation.isPending ? '...' : '↻ reload'}
             </button>
-          </div>
+          )}
+        </div>
+        {loadedTokenizers.length > 0 ? (
+          <select
+            className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
+            value={activeTokenizerId || ''}
+            onChange={(e) => setActiveTokenizer(e.target.value)}
+          >
+            <option value="">Select...</option>
+            {loadedTokenizers.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} ({t.source}, {t.vocab_size.toLocaleString()} tokens)
+              </option>
+            ))}
+          </select>
         ) : (
           <p className="text-sm text-gray-500">No tokenizers loaded yet.</p>
         )}
