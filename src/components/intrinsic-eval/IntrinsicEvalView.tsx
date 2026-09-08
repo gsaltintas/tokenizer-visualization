@@ -192,7 +192,7 @@ function FloresSection({ tokenizerId }: { tokenizerId: string }) {
       <p className="text-sm text-gray-500">
         Evaluate tokenization efficiency and fairness across languages using the{' '}
         <a
-          href="https://huggingface.co/datasets/facebook/flores"
+          href="https://huggingface.co/datasets/openlanguagedata/flores_plus"
           target="_blank"
           rel="noreferrer"
           className="text-blue-600 hover:underline"
