@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   // { to: '/morphemes', label: 'Morphemes', icon: '🔬' },
   // { to: '/undertrained', label: 'Under-trained', icon: '⚠' },
   { to: '/compare', label: 'Comparison', icon: '⇌' },
+  { to: '/intrinsic-eval', label: 'Intrinsic Eval', icon: '📊' },
   { to: '/merge-tree', label: 'Merge Tree', icon: '🌲' },
   { to: '/merge-forest', label: 'Merge Forest', icon: '🌳' },
 ];

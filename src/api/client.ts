@@ -251,3 +251,30 @@ export async function compareMergeTrees(
     body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
   });
 }
+
+// Intrinsic Eval
+export async function getFloresLanguages(): Promise<import('../types').FloresLanguage[]> {
+  const data = await fetchJSON<{ languages: import('../types').FloresLanguage[] }>(`${BASE}/intrinsic-eval/languages`);
+  return data.languages;
+}
+
+export async function perTextMetrics(
+  tokenizerId: string,
+  text: string,
+): Promise<import('../types').PerTextResponse> {
+  return fetchJSON<import('../types').PerTextResponse>(`${BASE}/intrinsic-eval/${encodeURIComponent(tokenizerId)}/per-text`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+}
+
+export async function floresEval(
+  tokenizerId: string,
+  languageCodes: string[],
+  nSamples: number = 200,
+): Promise<import('../types').FloresEvalResponse> {
+  return fetchJSON<import('../types').FloresEvalResponse>(`${BASE}/intrinsic-eval/${encodeURIComponent(tokenizerId)}/flores`, {
+    method: 'POST',
+    body: JSON.stringify({ language_codes: languageCodes, n_samples: nSamples }),
+  });
+}

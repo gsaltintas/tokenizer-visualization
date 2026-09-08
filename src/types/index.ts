@@ -242,3 +242,49 @@ export interface MergeForestTreesResponse {
   total_merges: number;
   total_roots: number;
 }
+
+// Intrinsic Eval
+export interface PerTextMetrics {
+  n_tokens: number;
+  n_words: number;
+  n_bytes: number;
+  n_chars: number;
+  fertility_words: number | null;
+  bytes_per_token: number | null;
+  chars_per_token: number | null;
+  tokens_per_byte: number | null;
+  integrity_rate: number | null;
+  boundary_crossing_rate: number | null;
+  byte_fallback_rate: number | null;
+}
+
+export interface PerTextResponse {
+  tokenizer_id: string;
+  metrics: PerTextMetrics;
+}
+
+export interface FloresLanguage {
+  code: string;
+  name: string;
+  script: string;
+}
+
+export interface PerLanguageResult {
+  code: string;
+  name?: string;
+  n_texts?: number;
+  n_tokens?: number;
+  n_bytes?: number;
+  n_words?: number;
+  fertility: number | null;
+  tokens_per_byte: number | null;
+  integrity_rate: number | null;
+  error?: string;
+}
+
+export interface FloresEvalResponse {
+  tokenizer_id: string;
+  gini: number | null;
+  n_languages: number;
+  per_language: PerLanguageResult[];
+}
