@@ -46,10 +46,10 @@ export async function reloadTokenizer(name: string): Promise<TokenizerInfo> {
   return data.tokenizer;
 }
 
-export async function loadTokenizer(name: string): Promise<TokenizerInfo> {
+export async function loadTokenizer(name: string, subfolder?: string): Promise<TokenizerInfo> {
   const data = await fetchJSON<{ tokenizer: TokenizerInfo }>(`${BASE}/tokenizers/load`, {
     method: 'POST',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, subfolder: subfolder || null }),
   });
   return data.tokenizer;
 }

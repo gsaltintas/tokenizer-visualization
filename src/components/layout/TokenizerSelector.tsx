@@ -6,6 +6,7 @@ import { useTokenizer } from '../../hooks/useTokenizer';
 export function TokenizerSelector() {
   const { activeTokenizerId, setActiveTokenizer } = useTokenizer();
   const [inputValue, setInputValue] = useState('');
+  const [subfolderValue, setSubfolderValue] = useState('');
   const queryClient = useQueryClient();
 
   const { data: tokenizers = [] } = useQuery({
@@ -14,11 +15,13 @@ export function TokenizerSelector() {
   });
 
   const loadMutation = useMutation({
-    mutationFn: loadTokenizer,
+    mutationFn: ({ name, subfolder }: { name: string; subfolder?: string }) =>
+      loadTokenizer(name, subfolder),
     onSuccess: (tok) => {
       setActiveTokenizer(tok.id);
       queryClient.invalidateQueries({ queryKey: ['tokenizers'] });
       setInputValue('');
+      setSubfolderValue('');
     },
   });
 
@@ -32,7 +35,8 @@ export function TokenizerSelector() {
   const handleLoad = () => {
     const name = inputValue.trim();
     if (name) {
-      loadMutation.mutate(name);
+      const subfolder = subfolderValue.trim() || undefined;
+      loadMutation.mutate({ name, subfolder });
     }
   };
 
@@ -90,6 +94,13 @@ export function TokenizerSelector() {
             {loadMutation.isPending ? 'Loading...' : 'Load'}
           </button>
         </div>
+        <input
+          className="w-full mt-1 px-3 py-1.5 border rounded-lg text-sm text-gray-600"
+          placeholder="Subfolder (optional, e.g. models/my-bpe)"
+          value={subfolderValue}
+          onChange={(e) => setSubfolderValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
+        />
         {loadMutation.isError && (
           <p className="text-sm text-red-500 mt-1">{(loadMutation.error as Error).message}</p>
         )}
@@ -104,7 +115,7 @@ export function TokenizerSelector() {
               className="px-2 py-0.5 bg-gray-100 rounded hover:bg-gray-200 text-gray-700"
               onClick={() => {
                 setInputValue(name);
-                loadMutation.mutate(name);
+                loadMutation.mutate({ name });
               }}
             >
               {name}
