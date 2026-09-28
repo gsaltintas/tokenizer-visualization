@@ -25,10 +25,10 @@ function TreeCard({ tree }: { tree: MergeForestTreeInfo }) {
           </span>
         </div>
         <div className="flex items-center gap-4 text-xs text-gray-500">
-          <span>rank {tree.root.rank}</span>
-          <span>{tree.byte_length} bytes</span>
-          <span>depth {tree.depth}</span>
-          <span>{tree.node_count} nodes</span>
+          <span title="Position in the merge order (lower = merged earlier)">rank {tree.root.rank}</span>
+          <span title="Length of the root token in bytes">{tree.byte_length} bytes</span>
+          <span title="Levels from the root down to the deepest leaf">depth {tree.depth}</span>
+          <span title="Total nodes in the expanded tree, including leaves">{tree.node_count} nodes</span>
         </div>
       </div>
       {!collapsed && (
@@ -91,10 +91,45 @@ export function MergeForestView() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Merge Forest</h2>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-gray-600 mb-2">
         Each connected component is a binary tree showing how bytes merge into a final token.
         Click a tree to expand its full decomposition.
       </p>
+
+      <details className="mb-4 text-sm text-gray-600 bg-white border rounded-lg">
+        <summary className="px-4 py-2 cursor-pointer select-none font-medium text-gray-700">
+          How to read this
+        </summary>
+        <div className="px-4 pb-3 space-y-2">
+          <p>
+            <strong>Rank</strong> is the token's position in the tokenizer's merge order: rank 0 is
+            learned first, and a lower rank means the merge is applied earlier when encoding. For
+            tiktoken encodings this is the true merge rank. For Hugging Face tokenizers it is
+            currently the vocabulary ID, which can be far from merge order: hand-added tokens (such
+            as runs of spaces or newlines) may have low IDs, and base characters high ones.
+          </p>
+          <p>
+            <span className="inline-block px-1.5 rounded font-mono border bg-amber-50 text-amber-800 border-amber-200">amber</span>{' '}
+            nodes are merged tokens.{' '}
+            <span className="inline-block px-1.5 rounded font-mono border bg-blue-50 text-blue-800 border-blue-200">blue</span>{' '}
+            nodes are leaves: base tokens that are not built from a merge. Under each merged token,
+            the first child is the left part (prefix) and the second is the right part (suffix).
+          </p>
+          <p>
+            A token's parts are chosen as the split whose worse part (the higher rank of the two)
+            is lowest, which reconstructs the merge BPE most likely used. The same part can appear
+            more than once, e.g. <code className="font-mono">"\n\n\n\n"</code> ={' '}
+            <code className="font-mono">"\n\n"</code> + <code className="font-mono">"\n\n"</code>,
+            and each copy is expanded.
+          </p>
+          <p>
+            <strong>Size</strong> is the root token's length in bytes, <strong>depth</strong> is the
+            number of levels from the root down to the deepest leaf (a lone leaf has depth 1), and <strong>nodes</strong> counts
+            every node in the expanded tree. The <code className="font-mono">0x…</code> value is the
+            token's raw bytes in hex.
+          </p>
+        </div>
+      </details>
 
       {/* Stats */}
       {data && (

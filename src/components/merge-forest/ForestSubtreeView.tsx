@@ -36,8 +36,15 @@ export function ForestSubtreeView({ node, depth = 0, onJumpToRank }: ForestSubtr
         >
           {JSON.stringify(node.token)}
         </span>
-        <span className="text-xs text-gray-400">
-          rank {node.rank}
+        <span
+          className="text-xs text-gray-400"
+          title={
+            isLeaf
+              ? 'Base token (not built from a merge). For Hugging Face tokenizers this is its vocab ID, not a merge position.'
+              : 'Position in the merge order (lower = merged earlier)'
+          }
+        >
+          {isLeaf ? 'base' : 'rank'} {node.rank}
         </span>
         {!isLeaf && (
           <span className="text-xs text-gray-300">
