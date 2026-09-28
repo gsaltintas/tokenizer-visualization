@@ -243,6 +243,23 @@ export interface MergeForestTreesResponse {
   total_roots: number;
 }
 
+// Pretokenize
+export interface NormalizationInfo {
+  type: string;
+  normalized_text: string;
+  changed: boolean;
+}
+
+export interface PretokenizeResponse {
+  normalization: NormalizationInfo;
+  chunks: string[];
+  chunk_spans: [number, number][];
+  chunk_count: number;
+  pretokenizer_type: string;
+  pretokenizer_description: string;
+  regex_pattern: string | null;
+}
+
 // Intrinsic Eval
 export interface PerTextMetrics {
   n_tokens: number;

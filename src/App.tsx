@@ -13,6 +13,7 @@ import { ComparisonView } from './components/comparison/ComparisonView';
 import { MergeTreeView } from './components/merge-tree/MergeTreeView';
 import { MergeForestView } from './components/merge-forest/MergeForestView';
 import { IntrinsicEvalView } from './components/intrinsic-eval/IntrinsicEvalView';
+import { PreTokenizeView } from './components/pretokenize/PreTokenizeView';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,7 +39,7 @@ function App() {
       <TokenizerContext.Provider
         value={{ activeTokenizerId, setActiveTokenizer, comparisonIds, toggleComparison }}
       >
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<TokenizeView />} />
@@ -51,6 +52,7 @@ function App() {
               <Route path="/merge-tree" element={<MergeTreeView />} />
               <Route path="/merge-forest" element={<MergeForestView />} />
               <Route path="/intrinsic-eval" element={<IntrinsicEvalView />} />
+              <Route path="/pretokenize" element={<PreTokenizeView />} />
             </Route>
           </Routes>
         </BrowserRouter>

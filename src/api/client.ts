@@ -18,7 +18,7 @@ import type {
 
 const BASE = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api';
+  : `${import.meta.env.BASE_URL}api`;
 
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
@@ -249,6 +249,17 @@ export async function compareMergeTrees(
   return fetchJSON<MergeTreeComparisonResponse>(`${BASE}/merge-tree/compare`, {
     method: 'POST',
     body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
+  });
+}
+
+// Pretokenize
+export async function pretokenizeText(
+  tokenizerId: string,
+  text: string,
+): Promise<import('../types').PretokenizeResponse> {
+  return fetchJSON(`${BASE}/pretokenize`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_id: tokenizerId, text }),
   });
 }
 
