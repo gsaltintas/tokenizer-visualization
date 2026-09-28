@@ -98,7 +98,10 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <header className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <span className="text-lg font-bold">Tokenizer Explorer</span>
+        <span className="flex items-center gap-2 text-lg font-bold">
+          <span aria-hidden="true">🐣</span>
+          Tokenizer Explorer
+        </span>
         <Link to="/tokenize" className="text-sm font-medium text-gray-600 hover:text-gray-900">
           Open the app →
         </Link>
@@ -209,7 +212,7 @@ export function LandingPage() {
 
       <footer className="border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500 flex flex-wrap gap-x-6 gap-y-2 justify-between">
-          <span>Tokenizer Explorer</span>
+          <span>🐣 Tokenizer Explorer</span>
           <a
             href="https://github.com/cimeister/tokenizer-intrinsic-evals"
             className="hover:text-gray-700"
