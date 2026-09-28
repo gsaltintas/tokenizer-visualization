@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { getMultiplicity, searchMultiplicity } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import type { MultiplicityGroup } from '../../types';
@@ -143,8 +144,24 @@ function VariantCard({ group, captureOpts }: VariantCardProps) {
 
 export function MultiplicityView() {
   const { activeTokenizerId } = useTokenizer();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(1);
+  // Search query and page live in the URL (?q=the&page=2) so views are shareable.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') ?? '';
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+  const updateParams = (updates: Record<string, string | null>) =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [k, v] of Object.entries(updates)) {
+          if (v) next.set(k, v);
+          else next.delete(k);
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  const setSearchQuery = (q: string) => updateParams({ q: q || null, page: null });
+  const setPage = (p: number) => updateParams({ page: p > 1 ? String(p) : null });
   const [includeLabel, setIncludeLabel] = useState(false);
   const [fontSizePx, setFontSizePx] = useState(28);
 
@@ -215,7 +232,7 @@ export function MultiplicityView() {
           className="w-full max-w-md px-3 py-2 border rounded-lg text-sm"
           placeholder="Search by base form (e.g., 'the', 'hello')..."
           value={searchQuery}
-          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
@@ -238,7 +255,7 @@ export function MultiplicityView() {
               <button
                 className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
                 disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
+                onClick={() => setPage(page - 1)}
               >
                 Previous
               </button>
@@ -248,7 +265,7 @@ export function MultiplicityView() {
               <button
                 className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
                 disabled={page >= Math.ceil(data.total_groups / 20)}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => setPage(page + 1)}
               >
                 Next
               </button>

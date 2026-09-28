@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TokenizerContext } from './hooks/useTokenizer';
+import { TokenizerUrlSync } from './hooks/TokenizerUrlSync';
 import { Layout } from './components/layout/Layout';
 import { LandingPage } from './components/landing/LandingPage';
 import { TokenizeView } from './components/tokenize/TokenizeView';
@@ -41,6 +42,7 @@ function App() {
         value={{ activeTokenizerId, setActiveTokenizer, comparisonIds, toggleComparison }}
       >
         <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <TokenizerUrlSync />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route element={<Layout />}>
