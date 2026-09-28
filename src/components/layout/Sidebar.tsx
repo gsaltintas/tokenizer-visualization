@@ -5,6 +5,7 @@ import { useTokenizer } from '../../hooks/useTokenizer';
 
 const NAV_ITEMS = [
   { to: '/tokenize', label: 'Tokenize', icon: '✦' },
+  { to: '/visualize', label: 'Token Boundaries', icon: '▦' },
   { to: '/vocab', label: 'Vocabulary', icon: '📖' },
   { to: '/multiplicity', label: 'Multiplicity', icon: '⊕' },
   { to: '/language', label: 'Language', icon: '🌐' },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
   // { to: '/undertrained', label: 'Under-trained', icon: '⚠' },
   { to: '/compare', label: 'Comparison', icon: '⇌' },
   { to: '/intrinsic-eval', label: 'Intrinsic Eval', icon: '📊' },
+  { to: '/sanity-check', label: 'Sanity Check', icon: '✓' },
   { to: '/pretokenize', label: 'Pre-tokenization', icon: '⚙' },
   { to: '/merge-tree', label: 'Merge Tree', icon: '🌲' },
   { to: '/merge-forest', label: 'Merge Forest', icon: '🌳' },

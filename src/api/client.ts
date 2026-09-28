@@ -288,3 +288,27 @@ export async function floresEval(
     body: JSON.stringify({ language_codes: languageCodes, n_samples: nSamples }),
   });
 }
+
+// Token-boundary visualization
+export async function getVisualizeSamples(): Promise<import('../types').VisualizeSample[]> {
+  const data = await fetchJSON<{ samples: import('../types').VisualizeSample[] }>(`${BASE}/visualize/samples`);
+  return data.samples;
+}
+
+export async function visualizeText(
+  tokenizerIds: string[],
+  text: string,
+): Promise<import('../types').VisualizeResult[]> {
+  const data = await fetchJSON<{ results: import('../types').VisualizeResult[] }>(`${BASE}/visualize`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
+  });
+  return data.results;
+}
+
+// Sanity check
+export async function runSanityCheck(tokenizerId: string): Promise<import('../types').SanityReport> {
+  return fetchJSON<import('../types').SanityReport>(`${BASE}/sanity-check/${encodeURIComponent(tokenizerId)}`, {
+    method: 'POST',
+  });
+}

@@ -17,6 +17,8 @@ import { MergeTreeView } from './components/merge-tree/MergeTreeView';
 import { MergeForestView } from './components/merge-forest/MergeForestView';
 import { IntrinsicEvalView } from './components/intrinsic-eval/IntrinsicEvalView';
 import { PreTokenizeView } from './components/pretokenize/PreTokenizeView';
+import { VisualizeView } from './components/visualize/VisualizeView';
+import { SanityCheckView } from './components/sanity/SanityCheckView';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +85,8 @@ function App() {
               <Route path="/merge-forest" element={<MergeForestView />} />
               <Route path="/intrinsic-eval" element={<IntrinsicEvalView />} />
               <Route path="/pretokenize" element={<PreTokenizeView />} />
+              <Route path="/visualize" element={<VisualizeView />} />
+              <Route path="/sanity-check" element={<SanityCheckView />} />
             </Route>
           </Routes>
         </BrowserRouter>

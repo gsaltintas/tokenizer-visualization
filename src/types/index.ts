@@ -305,3 +305,76 @@ export interface FloresEvalResponse {
   n_languages: number;
   per_language: PerLanguageResult[];
 }
+
+// Token-boundary visualization (TokEval tokenizer-visualize)
+export interface VisualizeSample {
+  label: string;
+  text: string;
+}
+
+export interface VisualizeToken {
+  id: number;
+  raw: string;
+  text?: string;
+  start?: number;
+  end?: number;
+  special: boolean;
+}
+
+export interface VisualizeSegment {
+  text: string;
+  token: number | null;
+  // >1 when each character in this run is split across that many byte-tokens, else 0
+  split: number;
+}
+
+export interface VisualizeStats {
+  whitespace_tokens: number;
+  newline_tokens: number;
+  newline_indent_tokens: number;
+  indentation_tokens: number;
+  special_tokens: number;
+  split_chars: number;
+  hidden_tokens: number;
+  indent_patterns: { spaces_per_token: number[]; count: number }[];
+  tokens_per_indent_depth: { depth: number; avg_tokens: number }[];
+}
+
+export interface VisualizeResult {
+  tokenizer_id: string;
+  name?: string;
+  error?: string;
+  n_tokens?: number;
+  has_offsets?: boolean;
+  tokens?: VisualizeToken[];
+  segments?: VisualizeSegment[] | null;
+  stats?: VisualizeStats | null;
+}
+
+// Sanity check (TokEval tokenizer-sanity-check)
+export type Severity = 'pass' | 'warn' | 'fail' | 'not_applicable' | 'unverifiable';
+
+export interface SanityCheck {
+  name: string;
+  category: string;
+  severity: Severity;
+  observed: unknown;
+  threshold: unknown;
+  detail: string;
+  rationale: string;
+  examples: unknown[];
+}
+
+export interface SanityReport {
+  tokenizer_id: string;
+  overall_severity: 'pass' | 'warn' | 'fail';
+  exit_code: number;
+  n_fail: number;
+  n_warn: number;
+  checks: SanityCheck[];
+  lossy_breakdown: Record<string, unknown>;
+  vocab_reachability: Record<string, unknown>;
+  vocab_composition: Record<string, unknown>;
+  components: Record<string, unknown>;
+  warnings: string[];
+}

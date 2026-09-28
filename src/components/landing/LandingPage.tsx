@@ -20,6 +20,7 @@ const FEATURE_GROUPS = [
     blurb: 'See exactly what a tokenizer does to your text.',
     items: [
       { to: '/tokenize', icon: '✦', label: 'Tokenize', desc: 'Split text into tokens with IDs, bytes and hex, then export as PNG or PDF.' },
+      { to: '/visualize', icon: '▦', label: 'Token Boundaries', desc: 'Token boundaries drawn on code, math and multilingual text, with split characters and indentation stats.' },
       { to: '/pretokenize', icon: '⚙', label: 'Pre-tokenization', desc: 'Step through normalization and pre-tokenization before the core algorithm runs.' },
       { to: '/vocab', icon: '📖', label: 'Vocabulary', desc: 'Browse and search the full vocabulary.' },
     ],
@@ -31,6 +32,7 @@ const FEATURE_GROUPS = [
       { to: '/multiplicity', icon: '⊕', label: 'Multiplicity', desc: 'Find every variant of a string in the vocabulary: casing, spacing, prefixes.' },
       { to: '/language', icon: '🌐', label: 'Language', desc: 'Break the vocabulary down by script and language.' },
       { to: '/intrinsic-eval', icon: '📊', label: 'Intrinsic Eval', desc: 'TokEval metrics per text, plus FLORES+ corpus-level metrics.' },
+      { to: '/sanity-check', icon: '✓', label: 'Sanity Check', desc: '16 health checks: byte coverage, whitespace, digits, special tokens, normalization, vocabulary.' },
       { to: '/compare', icon: '⇌', label: 'Comparison', desc: 'Vocabulary overlap and efficiency across two or more tokenizers.' },
     ],
   },
