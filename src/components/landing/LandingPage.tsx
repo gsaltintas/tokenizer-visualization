@@ -183,6 +183,30 @@ export function LandingPage() {
         ))}
       </section>
 
+      {/* Acknowledgements */}
+      <section className="border-t border-gray-200 bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Acknowledgements</h2>
+          <p className="mt-2 text-gray-600 max-w-3xl">
+            Tokenizer Explorer grew out of conversations with Colin Raffel and Clara Meister. We are grateful
+            for their ideas and feedback. Clara also built and open-sourced{' '}
+            <a
+              href="https://github.com/cimeister/tokenizer-intrinsic-evals"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              TokEval
+            </a>
+            , the library that powers the intrinsic evaluation metrics here.
+          </p>
+          <p className="mt-3 text-gray-600 max-w-3xl">
+            Spotted a mistake or have something to add? You can always reach me via my email (
+            <span className="font-mono">gsaltintas_at_cs0toronto0edu</span>).
+          </p>
+        </div>
+      </section>
+
       <footer className="border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500 flex flex-wrap gap-x-6 gap-y-2 justify-between">
           <span>Tokenizer Explorer</span>

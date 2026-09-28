@@ -9,8 +9,8 @@ function ensureLoaded(id: string) {
 }
 
 /**
- * Keeps the active tokenizer (`?tok=`) and comparison selection (`?cmp=a&cmp=b`)
- * in the URL so any view can be shared. Opening a link loads those tokenizers on
+ * Keeps the active tokenizer (`?tok=`) and, on Merge Tree, the comparison selection
+ * (`?cmp=a&cmp=b`) in the URL so views can be shared. Opening a link loads those tokenizers on
  * the backend (they may not be cached yet) and adds them to this browser's list.
  */
 export function TokenizerUrlSync() {
@@ -24,6 +24,8 @@ export function TokenizerUrlSync() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  // Comparison selection is only part of the link on views that use exactly it
+  const cmpInUrl = location.pathname === '/merge-tree';
   const urlTok = searchParams.get('tok');
   const urlCmp = searchParams.getAll('cmp');
   // Joined keys so effects can depend on array contents
@@ -59,7 +61,7 @@ export function TokenizerUrlSync() {
 
   // URL -> state: comparison selection
   useEffect(() => {
-    if (!urlCmpKey || urlCmpKey === stateCmpKey) return;
+    if (!cmpInUrl || !urlCmpKey || urlCmpKey === stateCmpKey) return;
     const ids = urlCmpKey.split('\n');
     const label = ids.join(', ');
     setLoading(label);
@@ -93,8 +95,9 @@ export function TokenizerUrlSync() {
     if (urlTok !== activeTokenizerId) {
       writeTok = activeTokenizerId ? tokChanged || !urlTok : tokChanged && !!urlTok;
     }
-    const writeCmp = urlCmpKey !== stateCmpKey && (cmpChanged || !urlCmpKey);
-    if (!writeTok && !writeCmp) return;
+    const writeCmp = cmpInUrl && urlCmpKey !== stateCmpKey && (cmpChanged || !urlCmpKey);
+    const stripCmp = !cmpInUrl && !!urlCmpKey;
+    if (!writeTok && !writeCmp && !stripCmp) return;
 
     setSearchParams(
       (prev) => {
@@ -103,10 +106,8 @@ export function TokenizerUrlSync() {
           if (activeTokenizerId) next.set('tok', activeTokenizerId);
           else next.delete('tok');
         }
-        if (writeCmp) {
-          next.delete('cmp');
-          comparisonIds.forEach((id) => next.append('cmp', id));
-        }
+        if (writeCmp || stripCmp) next.delete('cmp');
+        if (writeCmp) comparisonIds.forEach((id) => next.append('cmp', id));
         return next;
       },
       { replace: true },

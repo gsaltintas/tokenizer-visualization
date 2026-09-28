@@ -3,7 +3,7 @@
 Ideas and follow-ups not yet done. Move items to a commit message when they land.
 
 ## Shareable links
-- [ ] Put per-view inputs in the URL for the remaining views (Tokenize text, Vocab search/sort/page, Compare text, Merge Forest, Pre-tokenization, Intrinsic Eval languages). Done so far: Multiplicity (`?q=`, `?page=`), Merge Tree (`?text=`), and comparison selection (`?cmp=`) for all views.
+- [ ] Put per-view inputs in the URL for the remaining views (Tokenize text, Vocab search/sort/page, Compare text, Merge Forest, Pre-tokenization, Intrinsic Eval languages). Done so far: Multiplicity (`?q=`, `?page=`), Merge Tree (`?text=`, plus the comparison selection as `?cmp=`, which only Merge Tree links carry).
 - [ ] Merge Tree only uses the first two `cmp` selections; let the user pick which two.
 - [ ] Confirm the production host serves `index.html` for all app paths (SPA fallback), otherwise deep links like `/multiplicity?tok=...` 404.
 
