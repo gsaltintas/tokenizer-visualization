@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { loadTokenizer } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { PRESET_TOKENIZERS, TOKEN_COLORS } from '../../constants';
+import { PRESET_TOKENIZERS, tokenColorStyle } from '../../constants';
 
 // Illustrative segmentations of the same word under different vocabularies.
 const DEMO_SPLITS = [
@@ -68,8 +68,8 @@ function SplitDemo() {
         {split.map((piece, i) => (
           <span
             key={`${step}-${i}`}
-            className={`inline-block px-2 py-1 rounded border font-mono text-2xl animate-[chip-in_300ms_ease-out_both] ${TOKEN_COLORS[i % TOKEN_COLORS.length]}`}
-            style={{ animationDelay: `${i * 60}ms` }}
+            className="inline-block px-2 py-1 rounded border font-mono text-2xl animate-[chip-in_300ms_ease-out_both]"
+            style={{ ...tokenColorStyle(i), animationDelay: `${i * 60}ms` }}
           >
             {piece}
           </span>

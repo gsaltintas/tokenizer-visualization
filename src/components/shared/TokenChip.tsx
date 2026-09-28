@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { TokenInfo } from '../../types';
 
-import { TOKEN_COLORS } from '../../constants';
+import { tokenColorStyle } from '../../constants';
 
 interface TokenChipProps {
   token: TokenInfo;
@@ -11,12 +11,12 @@ interface TokenChipProps {
 
 export function TokenChip({ token, index, showId = false }: TokenChipProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  const colorClass = TOKEN_COLORS[index % TOKEN_COLORS.length];
   const displayStr = token.token_str.replace(/ /g, '\u00B7').replace(/\n/g, '\u21B5');
 
   return (
     <span
-      className={`relative inline-block px-1 py-0.5 mx-px rounded border text-sm font-mono cursor-default ${colorClass}`}
+      className="relative inline-block px-1 py-0.5 mx-px rounded border text-sm font-mono cursor-default"
+      style={tokenColorStyle(index)}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >

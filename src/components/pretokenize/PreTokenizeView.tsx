@@ -3,23 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { pretokenizeText, tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { TokenChip } from '../shared/TokenChip';
-
-const CHUNK_COLORS = [
-  'bg-blue-100 text-blue-900 border-blue-300',
-  'bg-emerald-100 text-emerald-900 border-emerald-300',
-  'bg-amber-100 text-amber-900 border-amber-300',
-  'bg-violet-100 text-violet-900 border-violet-300',
-  'bg-rose-100 text-rose-900 border-rose-300',
-  'bg-cyan-100 text-cyan-900 border-cyan-300',
-  'bg-orange-100 text-orange-900 border-orange-300',
-  'bg-teal-100 text-teal-900 border-teal-300',
-];
+import { chunkColorStyle } from '../../constants';
 
 function ChunkChip({ text, index }: { text: string; index: number }) {
-  const color = CHUNK_COLORS[index % CHUNK_COLORS.length];
   const display = text.replace(/ /g, '·').replace(/\n/g, '↵');
   return (
-    <span className={`inline-block px-1.5 py-0.5 mx-px rounded border text-sm font-mono ${color}`}>
+    <span className="inline-block px-1.5 py-0.5 mx-px rounded border text-sm font-mono" style={chunkColorStyle(index)}>
       {display}
     </span>
   );
@@ -237,12 +226,11 @@ function ChunkTokenTable({ chunks, tokenizerId }: { chunks: string[]; tokenizerI
         <tbody>
           {chunks.map((chunk, i) => {
             const td = allTokenData[i];
-            const chunkColor = CHUNK_COLORS[i % CHUNK_COLORS.length];
             return (
               <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-2 py-1.5 text-gray-400 font-mono">{i}</td>
                 <td className="px-2 py-1.5">
-                  <span className={`inline-block px-1.5 py-0.5 rounded border font-mono ${chunkColor}`}>
+                  <span className="inline-block px-1.5 py-0.5 rounded border font-mono" style={chunkColorStyle(i)}>
                     {chunk.replace(/ /g, '·') || <em className="opacity-50">space</em>}
                   </span>
                 </td>
