@@ -1,7 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { listTokenizers } from '../../api/client';
 import { TokenizerSelector } from './TokenizerSelector';
 import { useTokenizer } from '../../hooks/useTokenizer';
 
@@ -32,13 +30,7 @@ export function Sidebar() {
   const dragStartX = useRef(0);
   const dragStartWidth = useRef(0);
 
-  const { comparisonIds, toggleComparison } = useTokenizer();
-  const { data: tokenizers = [] } = useQuery({
-    queryKey: ['tokenizers'],
-    queryFn: listTokenizers,
-  });
-
-  const loadedTokenizers = tokenizers.filter((t) => t.vocab_size > 0);
+  const { comparisonIds, toggleComparison, loadedTokenizers } = useTokenizer();
   const expanded = width > COLLAPSE_THRESHOLD;
 
   const toggle = () => {

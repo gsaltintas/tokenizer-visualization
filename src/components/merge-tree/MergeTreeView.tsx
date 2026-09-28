@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { compareMergeTrees } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import type { MergeTreeNode, MergeTreeTokenizerResult } from '../../types';
@@ -73,7 +73,18 @@ function MergeSteps({ result }: { result: MergeTreeTokenizerResult }) {
 
 export function MergeTreeView() {
   const { comparisonIds } = useTokenizer();
-  const [text, setText] = useState('Ankara');
+  // Input text lives in the URL (?text=) so the view is shareable
+  const [searchParams, setSearchParams] = useSearchParams();
+  const text = searchParams.get('text') ?? 'Ankara';
+  const setText = (t: string) =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('text', t);
+        return next;
+      },
+      { replace: true },
+    );
 
   const enabled = comparisonIds.length >= 2 && text.length > 0;
   const ids = comparisonIds.slice(0, 2) as [string, string];

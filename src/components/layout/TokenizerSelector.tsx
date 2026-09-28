@@ -1,36 +1,42 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listTokenizers, loadTokenizer, reloadTokenizer } from '../../api/client';
-import { useTokenizer } from '../../hooks/useTokenizer';
+import { useMutation } from '@tanstack/react-query';
+import { loadTokenizer, reloadTokenizer } from '../../api/client';
+import { splitTokenizerId, useTokenizer } from '../../hooks/useTokenizer';
 import { PRESET_TOKENIZERS } from '../../constants';
 
 export function TokenizerSelector() {
-  const { activeTokenizerId, setActiveTokenizer } = useTokenizer();
+  const {
+    activeTokenizerId,
+    setActiveTokenizer,
+    loadedTokenizers,
+    addLoadedTokenizer,
+    removeLoadedTokenizer,
+  } = useTokenizer();
   const [inputValue, setInputValue] = useState('');
   const [subfolderValue, setSubfolderValue] = useState('');
-  const queryClient = useQueryClient();
-
-  const { data: tokenizers = [] } = useQuery({
-    queryKey: ['tokenizers'],
-    queryFn: listTokenizers,
-  });
 
   const loadMutation = useMutation({
     mutationFn: ({ name, subfolder }: { name: string; subfolder?: string }) =>
       loadTokenizer(name, subfolder),
     onSuccess: (tok) => {
+      addLoadedTokenizer(tok);
       setActiveTokenizer(tok.id);
-      queryClient.invalidateQueries({ queryKey: ['tokenizers'] });
       setInputValue('');
       setSubfolderValue('');
     },
   });
 
+  // The backend cache is shared and LRU-evicted, so re-load before activating a
+  // tokenizer from this browser's list (a no-op if it's still cached).
+  const selectTokenizer = (id: string) => {
+    if (!id) return setActiveTokenizer(null);
+    const [name, subfolder] = splitTokenizerId(id);
+    loadMutation.mutate({ name, subfolder });
+  };
+
   const reloadMutation = useMutation({
     mutationFn: reloadTokenizer,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tokenizers'] });
-    },
+    onSuccess: addLoadedTokenizer,
   });
 
   const handleLoad = () => {
@@ -41,29 +47,36 @@ export function TokenizerSelector() {
     }
   };
 
-  const loadedTokenizers = tokenizers.filter((t) => t.vocab_size > 0);
-
   return (
     <div className="space-y-3">
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="text-sm font-medium text-gray-700">Active Tokenizer</label>
           {activeTokenizerId && (
-            <button
-              onClick={() => reloadMutation.mutate(activeTokenizerId)}
-              disabled={reloadMutation.isPending}
-              title="Reload tokenizer"
-              className="text-xs text-gray-400 hover:text-gray-600 disabled:opacity-40"
-            >
-              {reloadMutation.isPending ? '...' : '↻ reload'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => reloadMutation.mutate(activeTokenizerId)}
+                disabled={reloadMutation.isPending}
+                title="Reload tokenizer"
+                className="text-xs text-gray-400 hover:text-gray-600 disabled:opacity-40"
+              >
+                {reloadMutation.isPending ? '...' : '↻ reload'}
+              </button>
+              <button
+                onClick={() => removeLoadedTokenizer(activeTokenizerId)}
+                title="Remove from your list"
+                className="text-xs text-gray-400 hover:text-red-600"
+              >
+                ✕ remove
+              </button>
+            </div>
           )}
         </div>
         {loadedTokenizers.length > 0 ? (
           <select
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
             value={activeTokenizerId || ''}
-            onChange={(e) => setActiveTokenizer(e.target.value)}
+            onChange={(e) => selectTokenizer(e.target.value)}
           >
             <option value="">Select...</option>
             {loadedTokenizers.map((t) => (

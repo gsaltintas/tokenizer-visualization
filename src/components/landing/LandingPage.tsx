@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { loadTokenizer } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { PRESET_TOKENIZERS, TOKEN_COLORS } from '../../constants';
@@ -82,14 +82,13 @@ function SplitDemo() {
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { setActiveTokenizer } = useTokenizer();
+  const { setActiveTokenizer, addLoadedTokenizer } = useTokenizer();
 
   const loadMutation = useMutation({
     mutationFn: (name: string) => loadTokenizer(name),
     onSuccess: (tok) => {
+      addLoadedTokenizer(tok);
       setActiveTokenizer(tok.id);
-      queryClient.invalidateQueries({ queryKey: ['tokenizers'] });
       navigate('/tokenize');
     },
   });

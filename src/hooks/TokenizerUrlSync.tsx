@@ -1,42 +1,53 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { loadTokenizer } from '../api/client';
-import { useTokenizer } from './useTokenizer';
+import { splitTokenizerId, useTokenizer } from './useTokenizer';
 
-// Backend tokenizer ids are `name` or `name::subfolder` (see registry._cache_key).
-function splitTokenizerId(id: string): [string, string | undefined] {
-  const idx = id.indexOf('::');
-  return idx === -1 ? [id, undefined] : [id.slice(0, idx), id.slice(idx + 2)];
+function ensureLoaded(id: string) {
+  const [name, subfolder] = splitTokenizerId(id);
+  return loadTokenizer(name, subfolder);
 }
 
 /**
- * Keeps the active tokenizer in the `?tok=` URL param so any view can be shared.
- * Opening a link with `?tok=` loads that tokenizer on the backend (it may not be
- * cached yet) and activates it.
+ * Keeps the active tokenizer (`?tok=`) and comparison selection (`?cmp=a&cmp=b`)
+ * in the URL so any view can be shared. Opening a link loads those tokenizers on
+ * the backend (they may not be cached yet) and adds them to this browser's list.
  */
 export function TokenizerUrlSync() {
-  const { activeTokenizerId, setActiveTokenizer } = useTokenizer();
+  const {
+    activeTokenizerId,
+    setActiveTokenizer,
+    comparisonIds,
+    setComparisonIds,
+    addLoadedTokenizer,
+  } = useTokenizer();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const queryClient = useQueryClient();
+
   const urlTok = searchParams.get('tok');
+  const urlCmp = searchParams.getAll('cmp');
+  // Joined keys so effects can depend on array contents
+  const urlCmpKey = urlCmp.join('\n');
+  const stateCmpKey = comparisonIds.join('\n');
+
   const latestUrlTok = useRef(urlTok);
   latestUrlTok.current = urlTok;
+  const latestUrlCmpKey = useRef(urlCmpKey);
+  latestUrlCmpKey.current = urlCmpKey;
+
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // URL -> state (shared link, back/forward)
+  // URL -> state: active tokenizer (shared link, back/forward)
   useEffect(() => {
     if (!urlTok || urlTok === activeTokenizerId) return;
-    const [name, subfolder] = splitTokenizerId(urlTok);
     setLoading(urlTok);
     setError(null);
-    loadTokenizer(name, subfolder)
+    ensureLoaded(urlTok)
       .then((tok) => {
         if (latestUrlTok.current !== urlTok) return;
+        addLoadedTokenizer(tok);
         setActiveTokenizer(tok.id);
-        queryClient.invalidateQueries({ queryKey: ['tokenizers'] });
       })
       .catch((e: Error) => {
         if (latestUrlTok.current === urlTok) setError(`Could not load "${urlTok}": ${e.message}`);
@@ -46,22 +57,63 @@ export function TokenizerUrlSync() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlTok]);
 
-  // state -> URL (selector change, or navigation that dropped the param)
-  const prevActive = useRef(activeTokenizerId);
+  // URL -> state: comparison selection
   useEffect(() => {
-    const changed = prevActive.current !== activeTokenizerId;
+    if (!urlCmpKey || urlCmpKey === stateCmpKey) return;
+    const ids = urlCmpKey.split('\n');
+    const label = ids.join(', ');
+    setLoading(label);
+    setError(null);
+    Promise.all(ids.map(ensureLoaded))
+      .then((toks) => {
+        if (latestUrlCmpKey.current !== urlCmpKey) return;
+        toks.forEach(addLoadedTokenizer);
+        setComparisonIds(toks.map((t) => t.id));
+      })
+      .catch((e: Error) => {
+        if (latestUrlCmpKey.current === urlCmpKey) setError(`Could not load comparison tokenizers: ${e.message}`);
+      })
+      .finally(() => setLoading((cur) => (cur === label ? null : cur)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlCmpKey]);
+
+  // state -> URL (selector/checkbox change, or navigation that dropped the params)
+  const prevActive = useRef(activeTokenizerId);
+  const prevCmpKey = useRef(stateCmpKey);
+  useEffect(() => {
+    const tokChanged = prevActive.current !== activeTokenizerId;
+    const cmpChanged = prevCmpKey.current !== stateCmpKey;
     prevActive.current = activeTokenizerId;
-    if (!activeTokenizerId || location.pathname === '/' || urlTok === activeTokenizerId) return;
-    if (!changed && urlTok) return; // URL points elsewhere and is being loaded above
+    prevCmpKey.current = stateCmpKey;
+    if (location.pathname === '/') return;
+
+    // Write state to the URL when it changed, or when the URL lost the param.
+    // Otherwise the URL points elsewhere and is being loaded above.
+    let writeTok = false;
+    if (urlTok !== activeTokenizerId) {
+      writeTok = activeTokenizerId ? tokChanged || !urlTok : tokChanged && !!urlTok;
+    }
+    const writeCmp = urlCmpKey !== stateCmpKey && (cmpChanged || !urlCmpKey);
+    if (!writeTok && !writeCmp) return;
+
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        next.set('tok', activeTokenizerId);
+        if (writeTok) {
+          if (activeTokenizerId) next.set('tok', activeTokenizerId);
+          else next.delete('tok');
+        }
+        if (writeCmp) {
+          next.delete('cmp');
+          comparisonIds.forEach((id) => next.append('cmp', id));
+        }
         return next;
       },
       { replace: true },
     );
-  }, [activeTokenizerId, urlTok, location.pathname, setSearchParams]);
+    // comparisonIds is covered by stateCmpKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTokenizerId, stateCmpKey, urlTok, urlCmpKey, location.pathname, setSearchParams]);
 
   if (!loading && !error) return null;
   return (
@@ -70,7 +122,7 @@ export function TokenizerUrlSync() {
         error ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-white text-gray-700 border'
       }`}
     >
-      {error ?? `Loading tokenizer ${loading} from link…`}
+      {error ?? `Loading ${loading} from link…`}
       {error && (
         <button className="ml-3 text-xs underline" onClick={() => setError(null)}>
           dismiss
