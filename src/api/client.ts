@@ -101,7 +101,6 @@ export async function searchMultiplicity(
 ): Promise<MultiplicityResponse> {
   const params = new URLSearchParams({ query });
   const url = `${BASE}/multiplicity/search/${tokId}?${params}`;
-  console.log('Search URL:', url);  
   return fetchJSON<MultiplicityResponse>(url);
 }
 

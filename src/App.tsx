@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TokenizerContext } from './hooks/useTokenizer';
 import { Layout } from './components/layout/Layout';
+import { LandingPage } from './components/landing/LandingPage';
 import { TokenizeView } from './components/tokenize/TokenizeView';
 import { VocabView } from './components/vocabulary/VocabView';
 import { MultiplicityView } from './components/multiplicity/MultiplicityView';
@@ -41,8 +42,9 @@ function App() {
       >
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<TokenizeView />} />
+              <Route path="/tokenize" element={<TokenizeView />} />
               <Route path="/vocab" element={<VocabView />} />
               <Route path="/multiplicity" element={<MultiplicityView />} />
               <Route path="/language" element={<LanguageView />} />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listTokenizers, loadTokenizer, reloadTokenizer } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
+import { PRESET_TOKENIZERS } from '../../constants';
 
 export function TokenizerSelector() {
   const { activeTokenizerId, setActiveTokenizer } = useTokenizer();
@@ -109,7 +110,7 @@ export function TokenizerSelector() {
       <div className="text-xs text-gray-500">
         <p className="font-medium mb-1">Presets:</p>
         <div className="flex flex-wrap gap-1">
-          {['gpt-4o', 'cl100k_base', 'gpt2', 'google/gemma-2-2b', 'english-32000-consistent-v1', 'meta-llama/Llama-3.2-1B', 'Qwen/QWen3-8B'].map((name) => (
+          {PRESET_TOKENIZERS.map((name) => (
             <button
               key={name}
               className="px-2 py-0.5 bg-gray-100 rounded hover:bg-gray-200 text-gray-700"

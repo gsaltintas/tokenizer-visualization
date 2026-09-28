@@ -1,12 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { listTokenizers } from '../../api/client';
 import { TokenizerSelector } from './TokenizerSelector';
 import { useTokenizer } from '../../hooks/useTokenizer';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Tokenize', icon: '✦' },
+  { to: '/tokenize', label: 'Tokenize', icon: '✦' },
   { to: '/vocab', label: 'Vocabulary', icon: '📖' },
   { to: '/multiplicity', label: 'Multiplicity', icon: '⊕' },
   { to: '/language', label: 'Language', icon: '🌐' },
@@ -90,7 +90,9 @@ export function Sidebar() {
           {expanded ? '◀' : '▶'}
         </button>
         {expanded && (
-          <h1 className="text-lg font-bold text-gray-900 truncate">Tokenizer Explorer</h1>
+          <Link to="/" className="text-lg font-bold text-gray-900 truncate hover:text-blue-700">
+            Tokenizer Explorer
+          </Link>
         )}
       </div>
 
