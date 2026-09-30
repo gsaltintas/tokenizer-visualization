@@ -22,8 +22,8 @@ export function LanguageView() {
   }
 
   const COLORS = [
-    '#6b8aa6', '#7d9a6f', '#c2a25a', '#b8705e', '#8e7ba3',
-    '#b07f8f', '#5f9690', '#9a9a5c', '#c48a5a', '#6f6f9a',
+    '#5b8fc7', '#6fa85a', '#d9a93a', '#d0694d', '#9a6fb8',
+    '#cf7596', '#3fa196', '#a3ad3c', '#e08c3e', '#6a67c4',
   ];
 
   const treemapData = data?.categories

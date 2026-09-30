@@ -3,12 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { pretokenizeText, tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { TokenChip } from '../shared/TokenChip';
-import { chunkColorStyle } from '../../constants';
+import { useTokenColors } from '../../tokenColors';
 
 function ChunkChip({ text, index }: { text: string; index: number }) {
+  const { chunkStyle } = useTokenColors();
   const display = text.replace(/ /g, '·').replace(/\n/g, '↵');
   return (
-    <span className="inline-block px-1.5 py-0.5 mx-px rounded border text-sm font-mono" style={chunkColorStyle(index)}>
+    <span className="inline-block px-1.5 py-0.5 mx-px rounded border text-sm font-mono" style={chunkStyle(index)}>
       {display}
     </span>
   );
@@ -202,6 +203,7 @@ export function PreTokenizeView() {
 }
 
 function ChunkTokenTable({ chunks, tokenizerId }: { chunks: string[]; tokenizerId: string }) {
+  const { chunkStyle } = useTokenColors();
   const { data: allTokenData } = useQuery({
     queryKey: ['tokenize', tokenizerId, chunks.join('\x00')],
     queryFn: () =>
@@ -230,7 +232,7 @@ function ChunkTokenTable({ chunks, tokenizerId }: { chunks: string[]; tokenizerI
               <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-2 py-1.5 text-gray-400 font-mono">{i}</td>
                 <td className="px-2 py-1.5">
-                  <span className="inline-block px-1.5 py-0.5 rounded border font-mono" style={chunkColorStyle(i)}>
+                  <span className="inline-block px-1.5 py-0.5 rounded border font-mono" style={chunkStyle(i)}>
                     {chunk.replace(/ /g, '·') || <em className="opacity-50">space</em>}
                   </span>
                 </td>

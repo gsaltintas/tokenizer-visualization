@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { loadTokenizer } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { PRESET_TOKENIZERS, tokenColorStyle } from '../../constants';
+import { PRESET_TOKENIZERS } from '../../constants';
+import { useTokenColors } from '../../tokenColors';
 
 // Illustrative segmentations of the same word under different vocabularies.
 const DEMO_SPLITS = [
@@ -48,6 +49,7 @@ const FEATURE_GROUPS = [
 
 function SplitDemo() {
   const [step, setStep] = useState(0);
+  const { tokenStyle } = useTokenColors();
 
   useEffect(() => {
     const timer = setInterval(() => setStep((s) => (s + 1) % DEMO_SPLITS.length), 1800);
@@ -69,7 +71,7 @@ function SplitDemo() {
           <span
             key={`${step}-${i}`}
             className="inline-block px-2 py-1 rounded border font-mono text-2xl animate-[chip-in_300ms_ease-out_both]"
-            style={{ ...tokenColorStyle(i), animationDelay: `${i * 60}ms` }}
+            style={{ ...tokenStyle(i), animationDelay: `${i * 60}ms` }}
           >
             {piece}
           </span>
