@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { getMultiplicity, searchMultiplicity } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import type { MultiplicityGroup } from '../../types';
+import { EXPORT_FONT_FAMILY } from '../../constants';
 
 interface CaptureOpts {
   includeLabel: boolean;
@@ -32,6 +33,8 @@ async function captureCard(
       el.style.fontSize = `${Math.round(origSize * ratio)}px`;
     });
   }
+  clone.style.fontFamily = EXPORT_FONT_FAMILY;
+  clone.querySelectorAll<HTMLElement>('*').forEach((el) => (el.style.fontFamily = EXPORT_FONT_FAMILY));
   // Hide the Copy PNG button in the export
   clone.querySelectorAll('button').forEach((btn) => btn.remove());
   // Limit variants to 8 per row using CSS grid
@@ -62,7 +65,7 @@ async function captureCard(
   out.height = cardCanvas.height + pad * 2 + labelFontSize + labelGap;
   const ctx = out.getContext('2d')!;
   ctx.fillStyle = '#374151';
-  ctx.font = `600 ${labelFontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+  ctx.font = `600 ${labelFontSize}px ${EXPORT_FONT_FAMILY}`;
   ctx.fillText(label, pad, pad + labelFontSize);
   ctx.drawImage(cardCanvas, pad, pad + labelFontSize + labelGap);
   return out;

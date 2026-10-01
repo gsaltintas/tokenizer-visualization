@@ -7,3 +7,7 @@ export const PRESET_TOKENIZERS = [
   'meta-llama/Llama-3.2-1B',
   'Qwen/QWen3-8B',
 ];
+
+// Concrete font names for PNG/PDF exports: html2canvas draws text onto a canvas, where generic
+// keywords like ui-monospace/system-ui may not resolve and the browser falls back to Times.
+export const EXPORT_FONT_FAMILY = '"Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif';

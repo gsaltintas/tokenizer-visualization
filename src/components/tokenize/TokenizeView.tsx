@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { TokenChip } from '../shared/TokenChip';
+import { EXPORT_FONT_FAMILY } from '../../constants';
 
 // Fixed CSS width for all exports so fonts are uniform across tokenizers.
 const EXPORT_WIDTH_PX = 720;
@@ -31,6 +32,8 @@ async function captureChips(
   `;
   const clone = chipsEl.cloneNode(true) as HTMLElement;
   clone.style.display = tight ? 'inline-flex' : 'flex';
+  clone.style.fontFamily = EXPORT_FONT_FAMILY;
+  clone.querySelectorAll<HTMLElement>('*').forEach((el) => (el.style.fontFamily = EXPORT_FONT_FAMILY));
   // Apply custom font size to all chip elements inside the clone
   if (fontSizePx !== 14) {
     const ratio = fontSizePx / 14; // 14px is the default text-sm
@@ -67,7 +70,7 @@ async function captureChips(
   out.height = chipsCanvas.height + pad * 2 + labelFontSize + labelGap;
   const ctx = out.getContext('2d')!;
   ctx.fillStyle = '#374151';
-  ctx.font = `600 ${labelFontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+  ctx.font = `600 ${labelFontSize}px ${EXPORT_FONT_FAMILY}`;
   ctx.fillText(label, pad, pad + labelFontSize);
   ctx.drawImage(chipsCanvas, pad, pad + labelFontSize + labelGap);
   return out;
