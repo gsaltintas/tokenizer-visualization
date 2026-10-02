@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getOverlap, compareTokenize, compareEfficiency } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { TokenChip } from '../shared/TokenChip';
+import { TokenChips } from '../shared/TokenChip';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 type Tab = 'overlap' | 'tokenize' | 'efficiency';
@@ -136,9 +136,7 @@ export function ComparisonView() {
                     <span className="text-sm text-gray-500">{result.token_count} tokens</span>
                   </div>
                   <div className="flex flex-wrap gap-0.5">
-                    {result.tokens.map((token, i) => (
-                      <TokenChip key={i} token={token} index={i} />
-                    ))}
+                    <TokenChips tokens={result.tokens} />
                   </div>
                 </div>
               ))}

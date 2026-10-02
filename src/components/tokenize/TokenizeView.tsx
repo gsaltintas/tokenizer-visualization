@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { TokenChip } from '../shared/TokenChip';
+import { TokenBytesLabel, TokenChips } from '../shared/TokenChip';
 import { EXPORT_FONT_FAMILY } from '../../constants';
 
 // Fixed CSS width for all exports so fonts are uniform across tokenizers.
@@ -34,18 +34,20 @@ async function captureChips(
   clone.style.display = tight ? 'inline-flex' : 'flex';
   clone.style.fontFamily = EXPORT_FONT_FAMILY;
   clone.querySelectorAll<HTMLElement>('*').forEach((el) => (el.style.fontFamily = EXPORT_FONT_FAMILY));
-  // Apply custom font size to all chip elements inside the clone
+  // Scale every chip element's font size and padding by the same ratio, so
+  // nested elements (split-character groups, byte badges) keep their proportions
   if (fontSizePx !== 14) {
     const ratio = fontSizePx / 14; // 14px is the default text-sm
     clone.style.fontSize = `${fontSizePx}px`;
     clone.style.gap = `${Math.round(2 * ratio)}px`;
-    clone.querySelectorAll('span').forEach((span) => {
-      span.style.fontSize = `${fontSizePx}px`;
-      const px = Math.max(1, Math.round(4 * ratio));
-      span.style.paddingLeft = `${px}px`;
-      span.style.paddingRight = `${px}px`;
-      span.style.paddingTop = `${Math.round(2 * ratio)}px`;
-      span.style.paddingBottom = `${Math.round(2 * ratio)}px`;
+    const origSpans = chipsEl.querySelectorAll<HTMLElement>('span');
+    clone.querySelectorAll<HTMLElement>('span').forEach((span, i) => {
+      const cs = getComputedStyle(origSpans[i]);
+      span.style.fontSize = `${parseFloat(cs.fontSize) * ratio}px`;
+      span.style.paddingLeft = `${Math.round(parseFloat(cs.paddingLeft) * ratio)}px`;
+      span.style.paddingRight = `${Math.round(parseFloat(cs.paddingRight) * ratio)}px`;
+      span.style.paddingTop = `${Math.round(parseFloat(cs.paddingTop) * ratio)}px`;
+      span.style.paddingBottom = `${Math.round(parseFloat(cs.paddingBottom) * ratio)}px`;
     });
   }
   wrapper.appendChild(clone);
@@ -230,18 +232,14 @@ export function TokenizeView() {
               </div>
             </div>
             <div ref={chipsRef} className="inline-flex flex-wrap gap-0.5 leading-relaxed">
-              {data.tokens.map((token, i) => (
-                <TokenChip key={i} token={token} index={i} />
-              ))}
+              <TokenChips tokens={data.tokens} />
             </div>
           </div>
 
           <div className="p-4 bg-white rounded-lg border">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Token IDs</h3>
             <div className="flex flex-wrap gap-1">
-              {data.tokens.map((token, i) => (
-                <TokenChip key={i} token={token} index={i} showId />
-              ))}
+              <TokenChips tokens={data.tokens} showId />
             </div>
           </div>
 
@@ -263,7 +261,13 @@ export function TokenizeView() {
                     <td className="px-2 py-1 text-gray-400">{i}</td>
                     <td className="px-2 py-1">
                       <span className={`px-1 rounded ${['bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-pink-50'][i % 5]}`}>
-                        {JSON.stringify(token.token_str)}
+                        {token.is_partial ? (
+                          <span title={`Partial UTF-8: decodes together with neighbours to ${JSON.stringify(token.group_str)}`}>
+                            <TokenBytesLabel hex={token.token_bytes_hex} />
+                          </span>
+                        ) : (
+                          JSON.stringify(token.token_str)
+                        )}
                       </span>
                     </td>
                     <td className="px-2 py-1">{token.id}</td>

@@ -13,6 +13,10 @@ export interface TokenInfo {
   byte_length: number;
   start?: number;
   end?: number;
+  // Tokens whose bytes only decode together share a group_id
+  is_partial?: boolean;
+  group_id?: number | null;
+  group_str?: string | null;
 }
 
 export interface TokenizeResponse {

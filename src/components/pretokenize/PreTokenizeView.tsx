@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { pretokenizeText, tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { TokenChip } from '../shared/TokenChip';
+import { TokenChips } from '../shared/TokenChip';
 import { useTokenColors } from '../../tokenColors';
 
 function ChunkChip({ text, index }: { text: string; index: number }) {
@@ -176,9 +176,7 @@ export function PreTokenizeView() {
                   )}
                 </p>
                 <div className="flex flex-wrap gap-y-1">
-                  {tokenData.tokens.map((token, i) => (
-                    <TokenChip key={i} token={token} index={i} />
-                  ))}
+                  <TokenChips tokens={tokenData.tokens} />
                 </div>
               </div>
             ) : (
@@ -238,9 +236,7 @@ function ChunkTokenTable({ chunks, tokenizerId }: { chunks: string[]; tokenizerI
                 </td>
                 <td className="px-2 py-1.5">
                   <div className="flex flex-wrap gap-y-0.5">
-                    {td?.tokens.map((token, j) => (
-                      <TokenChip key={j} token={token} index={j} />
-                    ))}
+                    {td && <TokenChips tokens={td.tokens} />}
                   </div>
                 </td>
                 <td className="px-2 py-1.5 text-right text-gray-500 font-mono">{td?.token_count ?? '—'}</td>
