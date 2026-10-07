@@ -5,7 +5,7 @@ export const PRESET_TOKENIZERS = [
   'google/gemma-2-2b',
   'english-32000-consistent-v1',
   'meta-llama/Llama-3.2-1B',
-  'Qwen/QWen3-8B',
+  'Qwen/Qwen3-8B',
 ];
 
 // Concrete font names for PNG/PDF exports: html2canvas draws text onto a canvas, where generic
