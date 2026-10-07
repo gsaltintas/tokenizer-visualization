@@ -382,3 +382,43 @@ export interface SanityReport {
   components: Record<string, unknown>;
   warnings: string[];
 }
+
+// Comparison: pre-tokenization and intrinsic metrics
+export interface PretokenChunk {
+  text: string;
+  start: number;
+  end: number;
+}
+
+export interface TokenizerPretokenization {
+  tokenizer_id: string;
+  normalization_type: string;
+  normalized_text: string;
+  normalization_changed: boolean;
+  pretokenizer_type: string;
+  pretokenizer_description: string;
+  regex_pattern: string | null;
+  chunks: PretokenChunk[];
+  tokens: TokenInfo[];
+  token_spans: [number, number][];
+  chunk_boundaries: number[];
+  token_boundaries: number[];
+  offsets_approximate: boolean;
+  tokens_per_chunk: number;
+  chunk_crossing_tokens: number;
+}
+
+export interface ComparisonPretokenizeResponse {
+  text: string;
+  results: TokenizerPretokenization[];
+  chunk_agreement: number[][];
+  token_agreement: number[][];
+}
+
+export interface ComparisonIntrinsicResponse {
+  results: PerTextResponse[];
+}
+
+export interface ComparisonFloresResponse {
+  results: FloresEvalResponse[];
+}
