@@ -191,7 +191,12 @@ export function PreTokenizeView() {
               <p className="text-xs text-gray-400 mb-3">
                 Each pretokenization chunk is tokenized independently. This shows how the algorithm distributes tokens within chunks.
               </p>
-              <ChunkTokenTable chunks={data.chunks} tokenizerId={activeTokenizerId} />
+              <ChunkTokenTable
+                chunks={data.chunks}
+                spans={data.chunk_spans}
+                normalizedText={data.normalization.normalized_text}
+                tokenizerId={activeTokenizerId}
+              />
             </div>
           )}
         </div>
@@ -200,12 +205,23 @@ export function PreTokenizeView() {
   );
 }
 
-function ChunkTokenTable({ chunks, tokenizerId }: { chunks: string[]; tokenizerId: string }) {
+interface ChunkTokenTableProps {
+  chunks: string[];
+  spans: [number, number][];
+  normalizedText: string;
+  tokenizerId: string;
+}
+
+function ChunkTokenTable({ chunks, spans, normalizedText, tokenizerId }: ChunkTokenTableProps) {
   const { chunkStyle } = useTokenColors();
+  // Tokenize each chunk's span of the actual text: chunks themselves can be in
+  // the pretokenizer's internal alphabet (ByteLevel shows a space as Ġ), and
+  // re-encoding those characters literally would tokenize the wrong bytes.
+  const sources = chunks.map((chunk, i) => (spans[i] ? normalizedText.slice(spans[i][0], spans[i][1]) : chunk));
   const { data: allTokenData } = useQuery({
-    queryKey: ['tokenize', tokenizerId, chunks.join('\x00')],
+    queryKey: ['tokenize', tokenizerId, sources.join('\x00')],
     queryFn: () =>
-      Promise.all(chunks.map((chunk) => tokenizeText(tokenizerId, chunk))),
+      Promise.all(sources.map((source) => tokenizeText(tokenizerId, source))),
     enabled: chunks.length > 0 && chunks.length <= 50,
   });
 
