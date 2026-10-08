@@ -187,6 +187,37 @@ export async function compareEfficiency(
   });
 }
 
+export async function comparePretokenize(
+  tokenizerIds: string[],
+  text: string
+): Promise<import('../types').ComparisonPretokenizeResponse> {
+  return fetchJSON(`${BASE}/comparison/pretokenize`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
+  });
+}
+
+export async function compareIntrinsic(
+  tokenizerIds: string[],
+  text: string
+): Promise<import('../types').ComparisonIntrinsicResponse> {
+  return fetchJSON(`${BASE}/comparison/intrinsic`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_ids: tokenizerIds, text }),
+  });
+}
+
+export async function compareFlores(
+  tokenizerIds: string[],
+  languageCodes: string[],
+  nSamples: number = 200
+): Promise<import('../types').ComparisonFloresResponse> {
+  return fetchJSON(`${BASE}/comparison/flores`, {
+    method: 'POST',
+    body: JSON.stringify({ tokenizer_ids: tokenizerIds, language_codes: languageCodes, n_samples: nSamples }),
+  });
+}
+
 // Merge Forest
 export async function getMergeForest(
   tokId: string,

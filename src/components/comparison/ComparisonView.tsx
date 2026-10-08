@@ -1,16 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getOverlap, compareTokenize, compareEfficiency } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { TokenChips } from '../shared/TokenChip';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { PretokenizeCompare } from './PretokenizeCompare';
+import { IntrinsicCompare } from './IntrinsicCompare';
 
-type Tab = 'overlap' | 'tokenize' | 'efficiency';
+type Tab = 'overlap' | 'tokenize' | 'pretokenize' | 'intrinsic' | 'efficiency';
+
+const TAB_LABELS: Record<Tab, string> = {
+  overlap: 'Vocabulary Overlap',
+  tokenize: 'Side-by-Side',
+  pretokenize: 'Pre-tokenization',
+  intrinsic: 'Intrinsic Metrics',
+  efficiency: 'Efficiency',
+};
+
+// Tabs that work on the shared input text
+const TEXT_TABS: Tab[] = ['tokenize', 'pretokenize', 'intrinsic'];
 
 export function ComparisonView() {
   const { comparisonIds } = useTokenizer();
   const [tab, setTab] = useState<Tab>('overlap');
-  const [compareText, setCompareText] = useState('The quick brown fox jumps over the lazy dog.');
+  const [compareText, setCompareText] = useState("Héllo world! It's 2026 — 東京 🎉 don't stop.");
+  const [debouncedText, setDebouncedText] = useState(compareText);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedText(compareText), 300);
+    return () => clearTimeout(t);
+  }, [compareText]);
 
   const { data: overlapData, isLoading: overlapLoading } = useQuery({
     queryKey: ['overlap', comparisonIds],
@@ -19,9 +38,9 @@ export function ComparisonView() {
   });
 
   const { data: tokenizeData, isLoading: tokenizeLoading } = useQuery({
-    queryKey: ['compareTokenize', comparisonIds, compareText],
-    queryFn: () => compareTokenize(comparisonIds, compareText),
-    enabled: comparisonIds.length >= 2 && tab === 'tokenize' && compareText.length > 0,
+    queryKey: ['compareTokenize', comparisonIds, debouncedText],
+    queryFn: () => compareTokenize(comparisonIds, debouncedText),
+    enabled: comparisonIds.length >= 2 && tab === 'tokenize' && debouncedText.length > 0,
   });
 
   const { data: efficiencyData, isLoading: efficiencyLoading } = useQuery({
@@ -50,16 +69,25 @@ export function ComparisonView() {
       </p>
 
       <div className="flex gap-2 mb-6 border-b pb-2">
-        {(['overlap', 'tokenize', 'efficiency'] as Tab[]).map((t) => (
+        {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
           <button
             key={t}
             className={`px-4 py-2 text-sm rounded-t-lg ${tab === t ? 'bg-white border border-b-white -mb-px font-medium' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setTab(t)}
           >
-            {t === 'overlap' ? 'Vocabulary Overlap' : t === 'tokenize' ? 'Side-by-Side' : 'Efficiency'}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
+
+      {TEXT_TABS.includes(tab) && (
+        <textarea
+          className="w-full h-24 px-4 py-3 mb-4 border rounded-lg text-sm font-mono resize-y"
+          value={compareText}
+          onChange={(e) => setCompareText(e.target.value)}
+          placeholder="Enter text to compare..."
+        />
+      )}
 
       {tab === 'overlap' && (
         <div>
@@ -118,13 +146,6 @@ export function ComparisonView() {
 
       {tab === 'tokenize' && (
         <div className="space-y-4">
-          <textarea
-            className="w-full h-24 px-4 py-3 border rounded-lg text-sm font-mono resize-y"
-            value={compareText}
-            onChange={(e) => setCompareText(e.target.value)}
-            placeholder="Enter text to compare tokenizations..."
-          />
-
           {tokenizeLoading ? (
             <p className="text-gray-500">Tokenizing...</p>
           ) : tokenizeData ? (
@@ -144,6 +165,10 @@ export function ComparisonView() {
           ) : null}
         </div>
       )}
+
+      {tab === 'pretokenize' && <PretokenizeCompare tokenizerIds={comparisonIds} text={debouncedText} />}
+
+      {tab === 'intrinsic' && <IntrinsicCompare tokenizerIds={comparisonIds} text={debouncedText} />}
 
       {tab === 'efficiency' && (
         <div>
