@@ -4,6 +4,7 @@ import { pretokenizeText, tokenizeText } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
 import { TokenChips } from '../shared/TokenChip';
 import { useTokenColors } from '../../tokenColors';
+import type { EncodingInfo } from '../../types';
 
 function ChunkChip({ text, index }: { text: string; index: number }) {
   const { chunkStyle } = useTokenColors();
@@ -129,8 +130,18 @@ export function PreTokenizeView() {
             )}
           </Step>
 
-          {/* Step 3 — Pretokenization */}
-          <Step number={3} label={`Pre-tokenization — ${data.pretokenizer_type}`}>
+          {/* Step 3 — script_tok encoding into atomic tokens, which happens before pre-tokenization */}
+          {data.encoding && (
+            <Step
+              number={3}
+              label={`Encoding — ${data.encoding.type === 'script_encoding' ? 'SCRIPT encoding' : 'UTF-8 bytes'}`}
+            >
+              <EncodingDisplay encoding={data.encoding} />
+            </Step>
+          )}
+
+          {/* Pretokenization */}
+          <Step number={data.encoding ? 4 : 3} label={`Pre-tokenization — ${data.pretokenizer_type}`}>
             <p className="text-xs text-gray-500 mb-2">{data.pretokenizer_description}</p>
 
             {data.pretokenizer_type !== 'none' && (
@@ -163,8 +174,8 @@ export function PreTokenizeView() {
             )}
           </Step>
 
-          {/* Step 4 — Final tokens */}
-          <Step number={4} label="Final tokens (after BPE/Unigram/WordPiece)">
+          {/* Final tokens */}
+          <Step number={data.encoding ? 5 : 4} label="Final tokens (after BPE/Unigram/WordPiece)">
             {tokenData ? (
               <div className="p-3 bg-white rounded border">
                 <p className="text-xs font-medium text-gray-600 mb-2">
@@ -202,6 +213,71 @@ export function PreTokenizeView() {
         </div>
       )}
     </div>
+  );
+}
+
+const MAX_ENCODED_UNITS = 300;
+
+// "<|BLOCK_Latin_LM_0|>" -> "Latin LM 0", "<|SCRIPT_INDEX_211|>" -> "#211", "<BYTE_C5>" -> "C5"
+function atomicLabel(label: string): string {
+  const block = label.match(/^<\|BLOCK_(.*)\|>$/);
+  if (block) return block[1].replace(/_/g, ' ');
+  const index = label.match(/^<\|SCRIPT_INDEX_(\d+)\|>$/);
+  if (index) return `#${index[1]}`;
+  const byte = label.match(/^<BYTE_([0-9A-F]{2})>$/);
+  if (byte) return byte[1];
+  return label;
+}
+
+function EncodingDisplay({ encoding }: { encoding: EncodingInfo }) {
+  const { chunkStyle } = useTokenColors();
+  // Color characters by their first atomic token (the script block, or the lead byte),
+  // so characters that share a block share a color
+  const colorIndex = new Map<number, number>();
+  for (const unit of encoding.units) {
+    const key = unit.atomic_ids[0];
+    if (!colorIndex.has(key)) colorIndex.set(key, colorIndex.size);
+  }
+  const shown = encoding.units.slice(0, MAX_ENCODED_UNITS);
+  const atomicCount = encoding.units.reduce((n, u) => n + u.atomic_ids.length, 0);
+
+  return (
+    <>
+      <p className="text-xs text-gray-500 mb-2">{encoding.description}</p>
+      <div className="p-3 bg-white rounded border">
+        <p className="text-xs font-medium text-gray-600 mb-2">
+          {encoding.units.length} character{encoding.units.length !== 1 ? 's' : ''} → {atomicCount} atomic token
+          {atomicCount !== 1 ? 's' : ''}
+          {encoding.type === 'script_encoding' && (
+            <span className="text-gray-400 font-normal ml-2">(script block + index within the block; color = block)</span>
+          )}
+        </p>
+        <div className="flex flex-wrap gap-1">
+          {shown.map((unit, i) => (
+            <span
+              key={i}
+              className="inline-flex flex-col self-start rounded border font-mono text-center"
+              style={chunkStyle(colorIndex.get(unit.atomic_ids[0]) ?? 0)}
+              title={unit.atomic_labels.map((l, k) => `${l} (id ${unit.atomic_ids[k]})`).join('\n')}
+            >
+              <span className="px-1.5 py-0.5 text-sm leading-tight">
+                {unit.text.replace(/ /g, '·').replace(/\n/g, '↵').replace(/\t/g, '⇥')}
+              </span>
+              <span className="flex border-t border-black/10">
+                {unit.atomic_labels.map((label, k) => (
+                  <span key={k} className={`px-1 text-[10px] leading-tight whitespace-nowrap ${k > 0 ? 'border-l border-black/10' : ''}`}>
+                    {atomicLabel(label)}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ))}
+        </div>
+        {encoding.units.length > MAX_ENCODED_UNITS && (
+          <p className="text-xs text-gray-400 mt-2">Showing the first {MAX_ENCODED_UNITS} characters.</p>
+        )}
+      </div>
+    </>
   );
 }
 
