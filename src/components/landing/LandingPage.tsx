@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { loadTokenizer } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import { PRESET_TOKENIZERS } from '../../constants';
+import { PRESET_TOKENIZERS, SCRIPT_TOK_PRESETS, scriptTokLabel } from '../../constants';
 import { useTokenColors } from '../../tokenColors';
 
 // Illustrative segmentations of the same word under different vocabularies.
@@ -153,6 +153,26 @@ export function LandingPage() {
                   className="px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 font-mono text-sm text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 transition-colors"
                 >
                   {pending ? 'Loading…' : name}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-4 text-sm text-gray-600">
+            <a href="https://github.com/sanderland/script_tok" className="text-blue-600 hover:underline">script_tok</a>{' '}
+            tokenizers from <em>Explicit Boundary Markers for Subword Vocabularies</em>:
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {SCRIPT_TOK_PRESETS.map((name) => {
+              const pending = loadMutation.isPending && loadMutation.variables === name;
+              return (
+                <button
+                  key={name}
+                  title={name}
+                  onClick={() => loadMutation.mutate(name)}
+                  disabled={loadMutation.isPending}
+                  className="px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 font-mono text-sm text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {pending ? 'Loading…' : scriptTokLabel(name)}
                 </button>
               );
             })}
