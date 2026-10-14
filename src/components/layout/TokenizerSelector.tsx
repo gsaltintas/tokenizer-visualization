@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { loadTokenizer, reloadTokenizer } from '../../api/client';
 import { splitTokenizerId, useTokenizer } from '../../hooks/useTokenizer';
-import { PRESET_TOKENIZERS } from '../../constants';
+import { PRESET_TOKENIZERS, SCRIPT_TOK_PRESETS, scriptTokLabel } from '../../constants';
 
 export function TokenizerSelector() {
   const {
@@ -133,6 +133,22 @@ export function TokenizerSelector() {
               }}
             >
               {name}
+            </button>
+          ))}
+        </div>
+        <p className="font-medium mt-2 mb-1">script_tok (boundary markers):</p>
+        <div className="flex flex-wrap gap-1">
+          {SCRIPT_TOK_PRESETS.map((name) => (
+            <button
+              key={name}
+              title={name}
+              className="px-2 py-0.5 bg-gray-100 rounded hover:bg-gray-200 text-gray-700"
+              onClick={() => {
+                setInputValue(name);
+                loadMutation.mutate({ name });
+              }}
+            >
+              {scriptTokLabel(name)}
             </button>
           ))}
         </div>
