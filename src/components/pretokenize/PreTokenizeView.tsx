@@ -295,7 +295,8 @@ function ChunkTokenTable({ chunks, spans, normalizedText, tokenizerId }: ChunkTo
   // re-encoding those characters literally would tokenize the wrong bytes.
   const sources = chunks.map((chunk, i) => (spans[i] ? normalizedText.slice(spans[i][0], spans[i][1]) : chunk));
   const { data: allTokenData } = useQuery({
-    queryKey: ['tokenize', tokenizerId, sources.join('\x00')],
+    // Not 'tokenize': that key caches a single response, and a one-chunk text would collide
+    queryKey: ['chunkTokenize', tokenizerId, sources.join('\x00')],
     queryFn: () =>
       Promise.all(sources.map((source) => tokenizeText(tokenizerId, source))),
     enabled: chunks.length > 0 && chunks.length <= 50,
