@@ -262,6 +262,20 @@ export interface PretokenizeResponse {
   pretokenizer_type: string;
   pretokenizer_description: string;
   regex_pattern: string | null;
+  // script_tok only: the atomic-token encoding applied before pre-tokenization
+  encoding?: EncodingInfo | null;
+}
+
+export interface EncodedUnit {
+  text: string;
+  atomic_ids: number[];
+  atomic_labels: string[];
+}
+
+export interface EncodingInfo {
+  type: 'script_encoding' | 'utf8';
+  description: string;
+  units: EncodedUnit[];
 }
 
 // Intrinsic Eval
