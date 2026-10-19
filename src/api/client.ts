@@ -320,6 +320,22 @@ export async function floresEval(
   });
 }
 
+export async function ustatEval(
+  tokenizerId: string,
+  opts: { languageCode?: string; text?: string; nSamples?: number; lam?: number; acrossSpaces?: boolean },
+): Promise<import('../types').UStatResponse> {
+  return fetchJSON<import('../types').UStatResponse>(`${BASE}/intrinsic-eval/${encodeURIComponent(tokenizerId)}/ustat`, {
+    method: 'POST',
+    body: JSON.stringify({
+      language_code: opts.languageCode,
+      text: opts.text,
+      n_samples: opts.nSamples ?? 500,
+      lam: opts.lam ?? 4.0,
+      across_spaces: opts.acrossSpaces ?? true,
+    }),
+  });
+}
+
 // Token-boundary visualization
 export async function getVisualizeSamples(): Promise<import('../types').VisualizeSample[]> {
   const data = await fetchJSON<{ samples: import('../types').VisualizeSample[] }>(`${BASE}/visualize/samples`);

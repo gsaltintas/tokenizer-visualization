@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { floresEval, getFloresLanguages, perTextMetrics } from '../../api/client';
+import { floresEval, getFloresLanguages, perTextMetrics, ustatEval } from '../../api/client';
 import { useTokenizer } from '../../hooks/useTokenizer';
-import type { FloresEvalResponse, PerTextMetrics } from '../../types';
+import type { FloresEvalResponse, PerTextMetrics, UStatToken } from '../../types';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -342,6 +342,107 @@ function FloresSection({ tokenizerId }: { tokenizerId: string }) {
   );
 }
 
+function UStatTable({ title, rows }: { title: string; rows: UStatToken[] }) {
+  return (
+    <div>
+      <h3 className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">{title}</h3>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-200 text-left text-gray-500">
+            <th className="py-1 pr-3 font-medium">Token</th>
+            <th className="py-1 pr-3 font-medium text-right">U</th>
+            <th className="py-1 pr-3 font-medium text-right">PMI min</th>
+            <th className="py-1 font-medium text-right">H min</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.token} className="border-b border-gray-100">
+              <td className="py-1 pr-3 font-mono whitespace-pre">{JSON.stringify(r.token)}</td>
+              <td className="py-1 pr-3 text-right tabular-nums">{fmt(r.ustat, 2)}</td>
+              <td className="py-1 pr-3 text-right tabular-nums">{fmt(r.pmi_min, 2)}</td>
+              <td className="py-1 text-right tabular-nums">{fmt(r.h_min, 2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function UStatSection({ tokenizerId }: { tokenizerId: string }) {
+  const [lang, setLang] = useState('eng_Latn');
+  const [nSamples, setNSamples] = useState(500);
+  const [acrossSpaces, setAcrossSpaces] = useState(true);
+  const { data: langs = [] } = useQuery({ queryKey: ['flores-languages'], queryFn: getFloresLanguages });
+  const mutation = useMutation({
+    mutationFn: () => ustatEval(tokenizerId, { languageCode: lang, nSamples, acrossSpaces }),
+  });
+  const r = mutation.data;
+
+  return (
+    <section className="space-y-4">
+      <h2 className="text-base font-semibold text-gray-800">Boundary statistics (U-statistic)</h2>
+      <p className="text-sm text-gray-500">
+        Per-token score U(w) = min adjacent-character PMI + 4 · min(left, right) branching entropy,
+        estimated from a FLORES+ corpus and aggregated over the vocabulary. Metrics from{' '}
+        <a href="https://arxiv.org/abs/2610.21679" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+          Lopardo et al. (2026)
+        </a>
+        ; U-statistic from Hu et al. (2025). Note: u_mean is not comparable across languages.
+      </p>
+      <div className="flex flex-wrap items-end gap-3 text-sm">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-500">Language</span>
+          <select className="border border-gray-300 rounded-lg px-2 py-1.5" value={lang} onChange={(e) => setLang(e.target.value)}>
+            {langs.map((l) => (
+              <option key={l.code} value={l.code}>{l.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-500">Sentences</span>
+          <input type="number" min={1} max={1012} className="border border-gray-300 rounded-lg px-2 py-1.5 w-24"
+            value={nSamples} onChange={(e) => setNSamples(Number(e.target.value))} />
+        </label>
+        <label className="flex items-center gap-1.5 pb-2">
+          <input type="checkbox" checked={acrossSpaces} onChange={(e) => setAcrossSpaces(e.target.checked)} />
+          <span>Statistics across spaces</span>
+        </label>
+        <button
+          onClick={() => mutation.mutate()}
+          disabled={mutation.isPending}
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        >
+          {mutation.isPending ? 'Computing…' : 'Compute U-statistic'}
+        </button>
+      </div>
+      {mutation.isError && <p className="text-sm text-red-600">{String(mutation.error)}</p>}
+      {r && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <MetricCard label="u_mean" value={fmt(r.u_mean)} />
+            <MetricCard label="u_median" value={fmt(r.u_median)} />
+            <MetricCard label="u_mean_weighted" value={fmt(r.u_mean_weighted)} sub="frequency-weighted" />
+            <MetricCard label="u_mean_log_weighted" value={fmt(r.u_mean_log_weighted)} sub="log(1+f)-weighted" />
+          </div>
+          <p className="text-xs text-gray-400">
+            {r.n_scored_tokens.toLocaleString()} of {r.n_vocab.toLocaleString()} vocabulary tokens scored
+            ({r.n_chars.toLocaleString()} corpus characters).
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <UStatTable title="Highest U (natural units)" rows={r.highest} />
+            <UStatTable title="Lowest U (cross boundaries)" rows={r.lowest} />
+          </div>
+          <p className="text-xs text-gray-400">
+            Citation: {r.citation}
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ── main view ────────────────────────────────────────────────────────────────
 
 export function IntrinsicEvalView() {
@@ -376,6 +477,8 @@ export function IntrinsicEvalView() {
       <PerTextSection tokenizerId={activeTokenizerId} />
       <hr className="border-gray-200" />
       <FloresSection tokenizerId={activeTokenizerId} />
+      <hr className="border-gray-200" />
+      <UStatSection tokenizerId={activeTokenizerId} />
     </div>
   );
 }

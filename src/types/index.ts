@@ -436,3 +436,30 @@ export interface ComparisonIntrinsicResponse {
 export interface ComparisonFloresResponse {
   results: FloresEvalResponse[];
 }
+
+// U-statistic (Lopardo et al., arXiv:2610.21679)
+export interface UStatToken {
+  token: string;
+  freq: number;
+  ustat: number;
+  pmi_min: number;
+  h_min: number;
+}
+
+export interface UStatResponse {
+  tokenizer_id: string;
+  u_mean: number;
+  u_median: number;
+  u_mean_weighted: number | null;
+  u_mean_log_weighted: number | null;
+  n_scored_tokens: number;
+  n_vocab: number;
+  n_chars: number;
+  lambda: number;
+  across_spaces: boolean;
+  highest: UStatToken[];
+  lowest: UStatToken[];
+  citation: string;
+  paper_url: string;
+  code_url: string;
+}
