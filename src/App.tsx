@@ -55,6 +55,12 @@ function App() {
     setActiveTokenizer((cur) => (cur === id ? null : cur));
   }, []);
 
+  const clearLoadedTokenizers = useCallback(() => {
+    setLoadedTokenizers([]);
+    setComparisonIds([]);
+    setActiveTokenizer(null);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TokenizerContext.Provider
@@ -67,6 +73,7 @@ function App() {
           loadedTokenizers,
           addLoadedTokenizer,
           removeLoadedTokenizer,
+          clearLoadedTokenizers,
         }}
       >
         <BrowserRouter basename={import.meta.env.BASE_URL}>

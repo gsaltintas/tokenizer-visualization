@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { loadTokenizer, reloadTokenizer } from '../../api/client';
+import { loadTokenizer, reloadTokenizer, unloadAllTokenizers } from '../../api/client';
 import { splitTokenizerId, useTokenizer } from '../../hooks/useTokenizer';
 import { PRESET_TOKENIZERS, SCRIPT_TOK_PRESETS, scriptTokLabel } from '../../constants';
 
@@ -11,6 +11,7 @@ export function TokenizerSelector() {
     loadedTokenizers,
     addLoadedTokenizer,
     removeLoadedTokenizer,
+    clearLoadedTokenizers,
   } = useTokenizer();
   const [inputValue, setInputValue] = useState('');
   const [subfolderValue, setSubfolderValue] = useState('');
@@ -32,6 +33,17 @@ export function TokenizerSelector() {
     if (!id) return setActiveTokenizer(null);
     const [name, subfolder] = splitTokenizerId(id);
     loadMutation.mutate({ name, subfolder });
+  };
+
+  const unloadAllMutation = useMutation({
+    mutationFn: unloadAllTokenizers,
+    onSuccess: clearLoadedTokenizers,
+  });
+
+  const unloadAll = () => {
+    if (window.confirm('Unload all tokenizers? This clears your list and frees them on the server.')) {
+      unloadAllMutation.mutate();
+    }
   };
 
   const reloadMutation = useMutation({
@@ -87,6 +99,19 @@ export function TokenizerSelector() {
           </select>
         ) : (
           <p className="text-sm text-gray-500">No tokenizers loaded yet.</p>
+        )}
+        {loadedTokenizers.length > 0 && (
+          <button
+            onClick={unloadAll}
+            disabled={unloadAllMutation.isPending}
+            title="Clear your list and unload every tokenizer on the server"
+            className="mt-1 text-xs text-gray-400 hover:text-red-600 disabled:opacity-40"
+          >
+            {unloadAllMutation.isPending ? 'Unloading…' : `✕ unload all (${loadedTokenizers.length})`}
+          </button>
+        )}
+        {unloadAllMutation.isError && (
+          <p className="text-xs text-red-500 mt-1">{(unloadAllMutation.error as Error).message}</p>
         )}
       </div>
 

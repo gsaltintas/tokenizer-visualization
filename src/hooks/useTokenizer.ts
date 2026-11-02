@@ -11,6 +11,7 @@ export const TokenizerContext = createContext<{
   loadedTokenizers: TokenizerInfo[];
   addLoadedTokenizer: (tok: TokenizerInfo) => void;
   removeLoadedTokenizer: (id: string) => void;
+  clearLoadedTokenizers: () => void;
 }>({
   activeTokenizerId: null,
   setActiveTokenizer: () => {},
@@ -20,6 +21,7 @@ export const TokenizerContext = createContext<{
   loadedTokenizers: [],
   addLoadedTokenizer: () => {},
   removeLoadedTokenizer: () => {},
+  clearLoadedTokenizers: () => {},
 });
 
 export function useTokenizer() {
