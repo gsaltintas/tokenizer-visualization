@@ -39,6 +39,12 @@ export async function listTokenizers(): Promise<TokenizerInfo[]> {
   return data.tokenizers;
 }
 
+// Unload every tokenizer from the backend's shared cache. Safe for other users:
+// the backend loads a tokenizer again on the next request that names it.
+export async function unloadAllTokenizers(): Promise<{ unloaded: string[] }> {
+  return fetchJSON(`${BASE}/tokenizers`, { method: 'DELETE' });
+}
+
 export async function reloadTokenizer(name: string): Promise<TokenizerInfo> {
   const data = await fetchJSON<{ tokenizer: TokenizerInfo }>(`${BASE}/tokenizers/${encodeURIComponent(name)}/reload`, {
     method: 'POST',
